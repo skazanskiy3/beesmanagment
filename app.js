@@ -111,32 +111,21 @@ function initDBConnection() {
 
 initDBConnection();
 
-app.get('/', routes.index);
+app.get('/', function(req, res) {
+  res.sendfile('views/home.html');
+});
+
+app.get('/users', function(req, res) {
+  res.sendfile('views/users.html');
+});
+
+app.get('/projects', function(req, res) {
+  res.sendfile('views/projects.html');
+});
 
 app.get('/login', function(req, res) {
   res.sendfile('views/login.html');
 });
-
-app.get('/home', function(req, res) {
-	  res.sendfile('views/home.html');
-});
-
-app.get('/createUser.html', function(req, res) {
-	  res.sendfile('views/createUser.html');
-});
-
-app.get('/changeUser.html', function(req, res) {
-	  res.sendfile('views/createUser.html');
-});
-
-app.get('/viewUser.html', function(req, res) {
-	  res.sendfile('views/createUser.html');
-});
-
-app.get('/deleteUser.html', function(req, res) {
-	  res.sendfile('views/createUser.html');
-});
-
 
 app.post('/login',
   passport.authenticate('local', {
@@ -241,9 +230,43 @@ app.post('/api/users', function(request, response) {
       password: request.body.password,
       role: request.body.role
     }
+    console.log("USER EMAL"+user.email);
+    if(user.email){
+      // save doc
+      usersDb.insert(user, function(err, doc) {
+          if (err) {
+              console.log(err);
+              response.sendStatus(500);
+              response.end();
+          } else {
+
+              existingdoc = doc;
+              console.log("New user created ..");
+              console.log(existingdoc);
+              response.sendStatus(201);
+              response.end();
+          }
+      });
+    } else {
+      response.sendStatus(400);
+      response.end();
+    }
+
+});
+
+
+app.post('/api/projects', function(request, response) {
+
+    console.log("Create User...");
+    console.log("Body: " + request.body);
+
+    var project = {
+      firstname: request.body.firstname,
+
+    }
 
     // save doc
-    usersDb.insert(user, function(err, doc) {
+    projectsDb.insert(project, function(err, doc) {
         if (err) {
             console.log(err);
             response.sendStatus(500);
@@ -251,13 +274,14 @@ app.post('/api/users', function(request, response) {
         } else {
 
             existingdoc = doc;
-            console.log("New user created ..");
+            console.log("New project created ..");
             console.log(existingdoc);
             response.sendStatus(201);
             response.end();
         }
     });
 });
+
 
 app.get('/api/users', function(request, response) {
 
@@ -295,7 +319,16 @@ app.get('/api/users', function(request, response) {
                             role: doc.role
                           }
 
-                          usersJson.push(user);
+                          usersJson.push(JSON.stringify(user));
+
+                          i++;
+                          if (i >= len) {
+                              console.log("USERS JSON "+JSON.stringify(usersJson));
+                              response.setHeader('Content-Type', 'application/json');
+                              response.write(JSON.stringify(usersJson));
+                              console.log('ending user response...');
+                              response.end();
+                          }
                       } else {
                           console.log(err);
                       }
@@ -303,8 +336,6 @@ app.get('/api/users', function(request, response) {
 
               });
 
-              response.setHeader('Content-Type', 'application/json');
-              response.send(JSON.stringify(users));
           }
         } else {
             console.log(err);
