@@ -8,6 +8,8 @@ var express = require('express'),
     http = require('http'),
     path = require('path'),
     fs = require('fs');
+    passport = require('passport');
+    LocalStrategy = require('passport-local').Strategy;
 
 var app = express();
 
@@ -68,7 +70,7 @@ function initDBConnection() {
         // Alternately you could point to a local database here instead of a
         // Bluemix service.
         // url will be in this format: https://username:password@xxxxxxxxx-bluemix.cloudant.com
-        dbCredentials.url = "REPLACE ME";
+        dbCredentials.url = "https://28091d4f-beee-4902-b164-573e30358cda-bluemix:4abb752088fcb81e06f8fdf41b2b6853155810136eba663244597201306493bf@28091d4f-beee-4902-b164-573e30358cda-bluemix.cloudant.com";
     }
 
     cloudant = require('cloudant')(dbCredentials.url);
@@ -91,6 +93,41 @@ app.get('/login', function(req, res) {
   res.sendfile('views/login.html');
 });
 
+app.post('/login',
+  passport.authenticate('local', {
+    successRedirect: '/loginSuccess',
+    failureRedirect: '/loginFailure'
+  })
+);
+
+app.get('/loginFailure', function(req, res, next) {
+  res.send('Failed to authenticate');
+});
+
+app.get('/loginSuccess', function(req, res, next) {
+  res.send('Successfully authenticated');
+});
+
+/////
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.serializeUser(function(user, done) {
+  done(null, user);
+});
+
+passport.deserializeUser(function(user, done) {
+  done(null, user);
+});
+
+passport.use(new LocalStrategy(function(username, password, done) {
+  process.nextTick(function() {
+    // Auth Check Logic
+  });
+}));
+
+
+/////
 function createResponseData(id, name, value, attachments) {
 
     var responseData = {
