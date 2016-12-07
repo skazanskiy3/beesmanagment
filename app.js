@@ -9,7 +9,7 @@ var express = require('express'),
     path = require('path'),
     fs = require('fs');
     passport = require('passport');
-    LocalStrategy = require('passport-local').Strategy;
+      LocalStrategy = require('passport-local').Strategy;
 
 var app = express();
 
