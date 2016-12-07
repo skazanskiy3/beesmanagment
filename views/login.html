@@ -8,6 +8,7 @@
 	<link rel="stylesheet" href="/style/style.css" />
 	<!-- Latest compiled and minified CSS -->
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" ></script>
 </head>
 <body>
@@ -21,7 +22,7 @@
        </div>
     </nav>
 	<div class = "col-md-6">
-		<form>
+		<form id="login_form">
   			<div class="form-group">
     			<label for="email">Email address:</label>
     			<input type="text" class="form-control" id="email" name  = "username">
@@ -33,10 +34,10 @@
   			<div class="checkbox">
     			<label><input type="checkbox"> Remember me</label>
  			</div>
-  			<button type="submit" class="btn btn-default" value="Submit">Submit</button>
-		</form>
+			<a href="/projects" class="btn btn-default"><span class="fa fa-user"></span>Submit</a>
+  		</form>
 	</div>
+	<script type="text/javascript" src="/scripts/sessions.js"></script>
 	</div>
 </body>
 </html>
-

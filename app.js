@@ -148,9 +148,87 @@ app.get('/loginSuccess', function(req, res, next) {
 // });
 
 app.post('/api/session', function(request, response){
-  response.setHeader('Content-Type', 'application/json');
-    response.status(200).send(JSON.stringify({ role: 'hr' }));
+
+  var username = request.body.username;
+  var password = request.body.password;
+
+  // console.log("VALIDATE "+validateUser(username,password));
+
+  db = cloudant.use(dbCredentials.dbName);
+  var docList = [];
+  var i = 0;
+  usersDb.list(function(err, body) {
+
+    console.log('Users body '+body);
+      if (!err) {
+        var len = body.rows.length;
+        console.log('total # of docs -> ' + len);
+        if (len == 0) {
+            // push sample data
+            // save doc
+            return false;
+        } else {
+
+            var usersJson = [];
+
+            var foundUsername = false;
+            var passwordMatch = false;
+
+            body.rows.forEach(function(document) {
+
+                usersDb.get(document.id, {
+                    revs_info: true
+                }, function(err, doc) {
+                    if (!err) {
+                        console.log("User email "+doc.email);
+                        console.log("Username "+username);
+
+                        if(username == doc.email){
+                          console.log("FOUND EMAIL");
+                          foundUsername = true;
+                          if(doc.password == password){
+                            passwordMatch = true;
+                          }
+                        } else {
+                          console.log("NO MATCH");
+                        }
+
+                        i++;
+                        if (i >= len) {
+                            if(foundUsername && passwordMatch){
+                              response.setHeader('Content-Type', 'application/json');
+                              response.status(200).send(JSON.stringify({ role: 'hr' }));
+                            } else {
+                              response.setHeader('Content-Type', 'application/json');
+                              response.status(401).send("Unauthorized");
+                            }
+                        }
+
+                    } else {
+                        console.log(err);
+                    }
+                });
+
+            });
+
+
+        }
+      } else {
+          console.log(err);
+      }
+  });
+
+  // if(validateUser(username,password)){
+  //   //validateUser(username,password)
+  //   response.setHeader('Content-Type', 'application/json');
+  //   response.status(200).send(JSON.stringify({ role: 'hr' }));
+  // } else {
+  //   response.setHeader('Content-Type', 'application/json');
+  //   response.status(401).send("Unauthorized");
+  // }
+
 });
+
 
 /////
 app.use(passport.initialize());
