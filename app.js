@@ -15,6 +15,10 @@ var app = express();
 
 var db;
 
+var usersDb;
+
+var projectsDb;
+
 var cloudant;
 
 var fileToUpload;
@@ -83,6 +87,26 @@ function initDBConnection() {
     });
 
     db = cloudant.use(dbCredentials.dbName);
+
+    var usersDbName = "users"
+    // check if DB exists if not create
+    cloudant.db.create(usersDbName, function(err, res) {
+        if (err) {
+            console.log('Could not create new db: ' + usersDbName + ', it might already exist.');
+        }
+    });
+
+    usersDb = cloudant.use(usersDbName);
+
+    var projectDbName = "project"
+    // check if DB exists if not create
+    cloudant.db.create(projectDbName, function(err, res) {
+        if (err) {
+            console.log('Could not create new db: ' + projectDbName + ', it might already exist.');
+        }
+    });
+
+    projectsDb = cloudant.use(projectDbName);
 }
 
 initDBConnection();
@@ -106,6 +130,16 @@ app.get('/loginFailure', function(req, res, next) {
 
 app.get('/loginSuccess', function(req, res, next) {
   res.send('Successfully authenticated');
+});
+
+// app.post('/api/session', function(request, response) {
+//   res.send('Failed to authenticate');
+//   console.log("SESSION");
+// });
+
+app.post('/api/session', function(request, response){
+  response.setHeader('Content-Type', 'application/json');
+    response.status(200).send(JSON.stringify({ role: 'hr' }));
 });
 
 /////
@@ -171,6 +205,108 @@ var saveDocument = function(id, name, value, response) {
     });
 
 }
+
+
+
+app.post('/api/users', function(request, response) {
+
+    console.log("Create User...");
+    console.log("Body: " + request.body);
+
+    var user = {
+      firstname: request.body.firstname,
+      lastname: request.body.lastname,
+      email: request.body.email,
+      password: request.body.password,
+      role: request.body.role
+    }
+
+    // save doc
+    usersDb.insert(user, function(err, doc) {
+        if (err) {
+            console.log(err);
+            response.sendStatus(500);
+            response.end();
+        } else {
+
+            existingdoc = doc;
+            console.log("New user created ..");
+            console.log(existingdoc);
+            response.sendStatus(201);
+            response.end();
+        }
+    });
+});
+
+app.get('/api/users', function(request, response) {
+
+    console.log("Get users method invoked.. ")
+
+    db = cloudant.use(dbCredentials.dbName);
+    var docList = [];
+    var i = 0;
+    usersDb.list(function(err, body) {
+
+      console.log('Users body '+body);
+        if (!err) {
+          var len = body.rows.length;
+          console.log('total # of docs -> ' + len);
+          if (len == 0) {
+              // push sample data
+              // save doc
+
+          } else {
+
+              var usersJson = [];
+
+              body.rows.forEach(function(document) {
+
+                  usersDb.get(document.id, {
+                      revs_info: true
+                  }, function(err, doc) {
+                      if (!err) {
+                          console.log("Doc "+Object.keys(doc));
+
+                          var user = {
+                            firstname: doc.firstname,
+                            lastname: doc.lastname,
+                            email: doc.email,
+                            role: doc.role
+                          }
+
+                          usersJson.push(user);
+                      } else {
+                          console.log(err);
+                      }
+                  });
+
+              });
+
+              response.setHeader('Content-Type', 'application/json');
+              response.send(JSON.stringify(users));
+          }
+        } else {
+            console.log(err);
+        }
+    });
+
+});
+
+//// api
+app.get('/api/teams', function(request, response){
+  response.setHeader('Content-Type', 'application/json');
+    response.send(JSON.stringify({ a: 1 }, null, 3));
+});
+
+app.get('/api/projects', function(request, response){
+  response.setHeader('Content-Type', 'application/json');
+    response.send(JSON.stringify({ a: 1 }, null, 3));
+});
+
+app.get('/api/users', function(request, response){
+  response.setHeader('Content-Type', 'application/json');
+    response.send(JSON.stringify({ a: 1 }, null, 3));
+});
 
 app.get('/api/favorites/attach', function(request, response) {
     var doc = request.query.id;
@@ -300,6 +436,7 @@ app.post('/api/favorites/attach', multipartMiddleware, function(request, respons
     });
 
 });
+
 
 app.post('/api/favorites', function(request, response) {
 

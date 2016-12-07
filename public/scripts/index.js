@@ -151,8 +151,6 @@ function addItem(item, isNew) {
         row.setAttribute('data-id', id);
     }
 
-
-
     if (item) // if not a new row
     {
         setRowContent(item, row);
