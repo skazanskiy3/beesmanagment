@@ -117,6 +117,27 @@ app.get('/login', function(req, res) {
   res.sendfile('views/login.html');
 });
 
+app.get('/home', function(req, res) {
+	  res.sendfile('views/home.html');
+});
+
+app.get('/createUser.html', function(req, res) {
+	  res.sendfile('views/createUser.html');
+});
+
+app.get('/changeUser.html', function(req, res) {
+	  res.sendfile('views/createUser.html');
+});
+
+app.get('/viewUser.html', function(req, res) {
+	  res.sendfile('views/createUser.html');
+});
+
+app.get('/deleteUser.html', function(req, res) {
+	  res.sendfile('views/createUser.html');
+});
+
+
 app.post('/login',
   passport.authenticate('local', {
     successRedirect: '/loginSuccess',
