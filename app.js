@@ -186,6 +186,8 @@ app.post('/api/session', function(request, response){
                         if(username == doc.email){
                           console.log("FOUND EMAIL");
                           foundUsername = true;
+                            
+                          // please excuse the lack of unhashed password
                           if(doc.password == password){
                             passwordMatch = true;
                           }
@@ -300,7 +302,8 @@ app.post('/api/users', function(request, response) {
 
     console.log("Create User...");
     console.log("Body: " + request.body);
-
+    
+    // please excuse the lack of unhashed passwords
     var user = {
       firstname: request.body.firstname,
       lastname: request.body.lastname,
